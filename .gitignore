@@ -1,4 +1,10 @@
+*
+!*.*
+!*/
 *.o
 *.swp
 *.swo
 *.pyc
+config.log
+config.status
+config.h
