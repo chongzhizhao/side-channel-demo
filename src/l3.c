@@ -462,6 +462,7 @@ l3pp_t l3_prepare(l3info_t l3info) {
   if (l3info != NULL)
     bcopy(l3info, &l3->l3info, sizeof(struct l3info));
   fillL3Info(l3);
+  printf("In l3_prepare: filled L3 info.\n");
 
   // Allocate cache  buffer
   int bufsize;
@@ -485,6 +486,7 @@ l3pp_t l3_prepare(l3info_t l3info) {
   }
   l3->buffer = buffer;
   l3->l3info.bufsize = bufsize;
+  printf("In l3_prepare: allocated buffer at %p of size %d\n", buffer, bufsize);
 
   // Create the cache map
   if (!ptemap(l3)) {
