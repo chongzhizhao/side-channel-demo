@@ -490,12 +490,16 @@ l3pp_t l3_prepare(l3info_t l3info) {
 
   // Create the cache map
   if (!ptemap(l3)) {
+    printf("In l3_prepare: ptemap failed\n");
     if (!probemap(l3)) {
+      printf("In l3_prepare: probemap failed. Freeing buffer\n");
       free(l3->buffer);
       free(l3);
       return NULL;
     }
+    printf("In l3_prepare: ptemap failed. probemap successful\n");
   }
+  printf("In l3_prepare: cache map successfully created \n");
 
   // Allocate monitored set info
   l3->monitoredbitmap = (uint32_t *)calloc(l3->ngroups*l3->groupsize/32, sizeof(uint32_t));
