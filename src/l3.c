@@ -222,6 +222,7 @@ void prime(void *pp, int reps) {
 #define str(x) #x
 #define xstr(x) str(x)
 
+// Return the total probe time of a linked list.
 int probetime(void *pp) {
   if (pp == NULL)
     return 0;
@@ -240,7 +241,8 @@ int bprobetime(void *pp) {
   return probetime(NEXTPTR(pp));
 }
 
-
+// Return the count of accesses going beyond
+// L3 when probing a linked list.
 int probecount(void *pp) {
   if (pp == NULL)
     return 0;
@@ -569,6 +571,8 @@ void l3_randomise(l3pp_t l3) {
   }
 }
 
+// Save the probe time of a monitored set
+// into the corresponding results element.
 void l3_probe(l3pp_t l3, uint16_t *results) {
   for (int i = 0; i < l3->nmonitored; i++) {
     int t = probetime(l3->monitoredhead[i]);
@@ -583,7 +587,8 @@ void l3_bprobe(l3pp_t l3, uint16_t *results) {
   }
 }
 
-
+// Save the returned count value of a monitored
+// set in the corresponding results element.
 void l3_probecount(l3pp_t l3, uint16_t *results) {
   for (int i = 0; i < l3->nmonitored; i++)
     results[i] = probecount(l3->monitoredhead[i]);
@@ -620,7 +625,9 @@ int l3_repeatedprobe(l3pp_t l3, int nrecords, uint16_t *results, int slot) {
 
   int len = l3->nmonitored;
 
+  // even selects the direction of probing.
   int even = 1;
+  // missed only get set when the designated interval end is missed.
   int missed = 0;
   uint64_t prev_time = rdtscp64();
   for (int i = 0; i < nrecords; i++, results+=len) {
@@ -634,6 +641,7 @@ int l3_repeatedprobe(l3pp_t l3, int nrecords, uint16_t *results, int slot) {
 	l3_bprobe(l3, results);
       even = !even;
     }
+    // In the case of non-zero idle interval, wait.
     if (slot > 0) {
       prev_time += slot;
       missed = slotwait(prev_time);

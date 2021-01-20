@@ -8,3 +8,5 @@
 config.log
 config.status
 config.h
+*.a
+*1.4.13

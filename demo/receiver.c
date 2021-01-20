@@ -5,13 +5,23 @@
 #include <util.h>
 #include <l3.h>
 
-#define SAMPLES 200
+// Controls the total number of samples for
+// measuring channel capacity.
+#define SAMPLES 1000
 
 
 int main(int ac, char **av) {
   delayloop(3000000000U);
 
+  // Fill L3 info, allocate buffer with huge pages,
+  // create cache map, and allocate monitored set info.
+  // Returns NULL when mmap or ptemap & probemap fails.
   l3pp_t l3 = l3_prepare(NULL);
+
+  if (l3 == NULL) {
+      printf("Initialization failed!\n");
+      return 1;
+  }
 
   int nsets = l3_getSets(l3);
 
@@ -23,7 +33,7 @@ int main(int ac, char **av) {
     l3_unmonitorall(l3);
     l3_monitor(l3, i);
 
-    l3_repeatedprobecount(l3, SAMPLES, res, 2000);
+    l3_repeatedprobecount(l3, SAMPLES, res, 0);
 
     for (int j = 0; j < SAMPLES; j++) {
       printf("%4d ", (int16_t)res[j]);
@@ -33,5 +43,6 @@ int main(int ac, char **av) {
 
   free(res);
   l3_release(l3);
+  return 0;
 }
 
