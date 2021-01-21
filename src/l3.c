@@ -413,8 +413,10 @@ static vlist_t map(l3pp_t l3, vlist_t lines) {
 }
 
 static int probemap(l3pp_t l3) {
-  if ((l3->l3info.flags & L3FLAG_NOPROBE) != 0)
+  if ((l3->l3info.flags & L3FLAG_NOPROBE) != 0) {
+    printf("In probemap: exiting because L3FlAG_NOPROBE is set\n");
     return 0;
+  }
   vlist_t pages = vl_new();
   for (int i = 0; i < l3->l3info.bufsize; i+= l3->groupsize * L3_CACHELINE) 
     vl_push(pages, l3->buffer + i);
@@ -431,12 +433,18 @@ static int probemap(l3pp_t l3) {
 }
 
 static int ptemap(l3pp_t l3) {
-  if ((l3->l3info.flags & L3FLAG_USEPTE) == 0)
+  if ((l3->l3info.flags & L3FLAG_USEPTE) == 0) {
+    printf("In ptemap: exiting because L3FLAG_USEPTE is not set\n");
     return 0;
-  if (getphysaddr(l3->buffer) == 0)
+  }
+  if (getphysaddr(l3->buffer) == 0) {
+    printf("In ptemap: exiting because getphysaddr is not working\n");
     return 0;
-  if (l3->l3info.slices & (l3->l3info.slices - 1)) // Cannot do non-linear for now
+  }
+  if (l3->l3info.slices & (l3->l3info.slices - 1)) {// Cannot do non-linear for now
+    printf("In ptemap: exiting because non-linear is not supported\n");
     return 0;
+  }
   l3->ngroups = l3->l3info.setsperslice * l3->l3info.slices / l3->groupsize;
   l3->groups = (vlist_t *)calloc(l3->ngroups, sizeof(vlist_t));
   for (int i = 0; i < l3->ngroups; i++)
@@ -478,9 +486,11 @@ l3pp_t l3_prepare(l3info_t l3info) {
   if (buffer == MAP_FAILED) {
     bufsize = l3->l3info.bufsize;
     l3->groupsize = L3_SETS_PER_PAGE;
+    printf("In l3_prepare: using non-huge pages for mmap\n");
     buffer = mmap(NULL, bufsize, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0);
   }
   if (buffer == MAP_FAILED) {
+    printf("In l3_prepare: mmap for buffer failed\n");
     free(l3);
     return NULL;
   }
@@ -497,7 +507,7 @@ l3pp_t l3_prepare(l3info_t l3info) {
       free(l3);
       return NULL;
     }
-    printf("In l3_prepare: ptemap failed. probemap successful\n");
+    printf("In l3_prepare: probemap successful\n");
   }
   printf("In l3_prepare: cache map successfully created \n");
 
